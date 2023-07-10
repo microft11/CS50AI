@@ -18,7 +18,7 @@ def load_data(directory):
     Load data from CSV files into memory.
     """
     # Load people
-    with open(f"/people.csv", encoding="utf-8") as f:
+    with open(f"{directory}/people.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             people[row["id"]] = {
@@ -32,7 +32,7 @@ def load_data(directory):
                 names[row["name"].lower()].add(row["id"])
 
     # Load movies
-    with open(f"/movies.csv", encoding="utf-8") as f:
+    with open(f"{directory}/movies.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             movies[row["id"]] = {
@@ -42,7 +42,7 @@ def load_data(directory):
             }
 
     # Load stars
-    with open(f"/stars.csv", encoding="utf-8") as f:
+    with open(f"{directory}/stars.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             try:
@@ -92,8 +92,30 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    frontier = QueueFrontier()
+    explored = set()
+    frontier.add(Node(source, None, None))
+    while not frontier.empty():
+        node = frontier.remove()
+        neighbors = neighbors_for_person(node.state)
+        for neighbor in neighbors:
+            _, person_id = neighbor
+
+            # find a solution
+            if person_id == target:
+                path = [neighbor]
+                while node.parent is not None:
+                    path.append(node.action)
+                    node = node.parent
+                path.reverse()
+                return path
+
+            # add new frontier
+            if person_id not in explored and not frontier.contains_state(person_id):
+                frontier.add(Node(person_id, node, neighbor))
+
+
+
 
 
 def person_id_for_name(name):
