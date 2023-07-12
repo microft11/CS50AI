@@ -153,3 +153,7 @@ def minimax(board):
 
     else:
         return min_value(board)
+
+'''
+add for git test
+'''
