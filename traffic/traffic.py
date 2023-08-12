@@ -58,7 +58,19 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    images = []
+    labels = []
+
+    for directory in os.listdir(data_dir):
+        print(f"Started loading files from {directory}directory")
+        for file in os.listdir(os.path.join(data_dir, directory)):
+            image = cv2.imread(os.path.join(data_dir, directory, file))
+            resized = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+            images.append(resized)
+            labels.append(int(directory))
+        print(f"Ended loading file from {directory}directory")
+
+    return images, labels
 
 
 def get_model():
@@ -67,7 +79,41 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    model = tf.keras.models.Sequential([
+        # convolution layer. learn 32 filters using 3x3 kernel
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+        # max pooling layer , using 2x2 pool size
+        tf.keras.layers.MaxPool2D(pool_size=(2, 2)),
+
+        # convolution layer. learn 32 filters using 3x3 kernel
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+        # max pooling layer , using 2x2 pool size
+        tf.keras.layers.MaxPool2D(pool_size=(2, 2)),
+
+        # flatten units
+        tf.keras.layers.Flatten(),
+
+        # add a hidden layer with dropout
+        tf.keras.layers.Dense(123, activation="relu"),
+        tf.keras.layers.Dropout(0.5),
+
+        # add an output units for all 10 digits
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+    ])
+
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+
+    model.summary()
+
+    return model
 
 
 if __name__ == "__main__":
